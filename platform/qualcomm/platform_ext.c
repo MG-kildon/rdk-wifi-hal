@@ -1614,7 +1614,7 @@ static void parse_iwcustom_buffer(const void *buf, unsigned int len)
                         process_event_to_onewifi(ifname, radio_channel_param, data, iwp->length);
                         break;
                     default:
-                        wifi_hal_info_print("Unknown event %s:%d\n", __func__, __LINE__);
+                        wifi_hal_info_print("Unknown event %s:%d: flag %d\n", __func__, __LINE__, iwp->flags);
                         break;
                     }
                 }
