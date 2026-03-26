@@ -17758,6 +17758,30 @@ int nl80211_dfs_cac_started(wifi_interface_info_t *interface, int freq, int ht_e
 int nl80211_dfs_radar_cac_aborted(wifi_interface_info_t *interface, int freq, int ht_enabled,
                                int sec_chan_offset, int bandwidth, int bw, int cf1, int cf2)
 {
+    wifi_device_callbacks_t *callbacks = get_hal_device_callbacks();
+    wifi_channel_change_event_t radio_channel_param;
+    wifi_radio_info_t *radio;
+
+    if(!interface->u.ap.iface.cac_started) {
+        return 0;
+    }
+
+    radio = get_radio_by_rdk_index(interface->vap_info.radio_index);
+    if (radio == NULL) {
+        wifi_hal_error_print("%s:%d radio is NULL for radio index:%u\n", __func__, __LINE__, interface->vap_info.radio_index);
+        return 0;
+    }
+
+    if ((callbacks != NULL) && (callbacks->channel_change_event_callback)) {
+       memset(&radio_channel_param, 0, sizeof(radio_channel_param));
+       radio_channel_param.radioIndex = interface->vap_info.radio_index;
+       radio_channel_param.event = WIFI_EVENT_DFS_RADAR_DETECTED;
+       radio_channel_param.sub_event = WIFI_EVENT_RADAR_CAC_ABORTED;
+       radio_channel_param.channel = radio->oper_param.channel;
+       radio_channel_param.channelWidth = radio->oper_param.channelWidth;
+       radio_channel_param.op_class = radio->oper_param.operatingClass;
+       callbacks->channel_change_event_callback(radio_channel_param);
+    }
 #ifdef CMXB7_PORT
     wifi_radio_info_t *radio;
     wifi_radio_operationParam_t radio_param;
